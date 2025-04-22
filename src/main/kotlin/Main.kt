@@ -10,16 +10,36 @@ data class Word(
 
 fun main() {
 
-    val wordsFile: File = File("words.txt")
-    var dictionary = mutableListOf<Word>()
+    val dictionary = loadDictionary()
 
-    val lines = wordsFile.readLines()
-    for (line in lines) {
+    while (true) {
+
+        println(
+            """
+        Меню: 
+        1 – Учить слова
+        2 – Статистика
+        0 – Выход
+    """.trimIndent()
+        )
+        val inputUser = readln().toInt()
+
+        when (inputUser) {
+            1 -> println("Учить слова")
+            2 -> println("Статистика")
+            0 -> break
+            else -> println("Введите число 1, 2 или 0")
+        }
+    }
+}
+
+fun loadDictionary(): List<Word> {
+
+    val wordsFile: File = File("words.txt")
+
+    return wordsFile.readLines().map { line ->
         val line = line.split("|")
         val correctCount = line.getOrNull(2)?.toIntOrNull() ?: 0
-        val word = Word(original = line[0], translate = line[1], correctAnswersCount = correctCount)
-        dictionary.add(word)
-        println(word)
+        Word(original = line[0], translate = line[1], correctAnswersCount = correctCount)
     }
-    dictionary.forEach { println("${it.original} - ${it.translate} - ${it.correctAnswersCount}") }
 }
