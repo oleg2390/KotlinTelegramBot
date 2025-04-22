@@ -2,6 +2,9 @@ package org.example
 
 import java.io.File
 
+private const val LEARNED_COUNT = 3
+private const val PERCENT_100 = 100
+
 data class Word(
     val original: String,
     val translate: String,
@@ -26,7 +29,13 @@ fun main() {
 
         when (inputUser) {
             1 -> println("Учить слова")
-            2 -> println("Статистика")
+            2 -> {
+                val count = dictionary.filter { it.correctAnswersCount >= LEARNED_COUNT }.count()
+                val totalCount = dictionary.size
+                val percent = count * PERCENT_100 / totalCount
+                println("Выучено $count из $totalCount | $percent%\n")
+            }
+
             0 -> break
             else -> println("Введите число 1, 2 или 0")
         }
