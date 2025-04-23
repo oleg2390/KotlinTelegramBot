@@ -4,3 +4,6 @@ cat|кошка|3
 thank you|спасибо|0
 screen|экран|3
 cell|ячейка|3
+number|число|0
+store|хранить|0
+assign|присвоить|0

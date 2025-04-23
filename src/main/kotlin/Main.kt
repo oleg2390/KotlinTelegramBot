@@ -14,6 +14,7 @@ data class Word(
 fun main() {
 
     val dictionary = loadDictionary()
+    val notLearnedList = dictionary.filter { it.correctAnswersCount < LEARNED_COUNT }
 
     while (true) {
 
@@ -28,7 +29,21 @@ fun main() {
         val inputUser = readln().toInt()
 
         when (inputUser) {
-            1 -> println("Учить слова")
+            1 -> {
+                if (notLearnedList.isEmpty()) {
+                    println("Все слова в словаре выучены")
+                    continue
+                }
+                val questionWords = notLearnedList.take(4).shuffled()
+                val correctAnswer = notLearnedList.random()
+
+                println()
+                println("${correctAnswer.original}:")
+                questionWords.forEachIndexed() { index, word ->
+                    println(" ${index + 1} - ${word.translate}")
+                }
+            }
+
             2 -> {
                 val count = dictionary.filter { it.correctAnswersCount >= LEARNED_COUNT }.count()
                 val totalCount = dictionary.size
