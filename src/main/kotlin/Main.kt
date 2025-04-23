@@ -4,6 +4,7 @@ import java.io.File
 
 private const val LEARNED_COUNT = 3
 private const val PERCENT_100 = 100
+private const val NUMBER_4 = 4
 
 data class Word(
     val original: String,
@@ -34,13 +35,21 @@ fun main() {
                     println("Все слова в словаре выучены")
                     continue
                 }
-                val questionWords = notLearnedList.take(4).shuffled()
-                val correctAnswer = notLearnedList.random()
+                while (true) {
 
-                println()
-                println("${correctAnswer.original}:")
-                questionWords.forEachIndexed() { index, word ->
-                    println(" ${index + 1} - ${word.translate}")
+                    val questionWords = notLearnedList.take(NUMBER_4).shuffled()
+                    val correctAnswer = notLearnedList.random()
+
+                    println()
+                    println("${correctAnswer.original}:")
+                    questionWords.forEachIndexed() { index, word ->
+                        println(" ${index + 1} - ${word.translate}")
+                    }
+
+                    val inputUserAnswer = readln().toInt()
+                    if (inputUserAnswer == 0) {
+                        break
+                    }
                 }
             }
 
@@ -54,6 +63,7 @@ fun main() {
             0 -> break
             else -> println("Введите число 1, 2 или 0")
         }
+
     }
 }
 
