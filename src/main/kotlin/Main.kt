@@ -45,11 +45,6 @@ fun main() {
                     questionWords.forEachIndexed() { index, word ->
                         println(" ${index + 1} - ${word.translate}")
                     }
-
-                    val inputUserAnswer = readln().toInt()
-                    if (inputUserAnswer == 0) {
-                        break
-                    }
                 }
             }
 
