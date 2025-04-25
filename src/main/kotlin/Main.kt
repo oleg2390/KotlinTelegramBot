@@ -33,10 +33,7 @@ fun main() {
             1 -> {
                 if (notLearnedList.isEmpty()) {
                     println("Все слова в словаре выучены")
-                    continue
-                }
-                while (true) {
-
+                } else {
                     val questionWords = notLearnedList.take(NUMBER_4).shuffled()
                     val correctAnswer = notLearnedList.random()
 
@@ -45,6 +42,7 @@ fun main() {
                     questionWords.forEachIndexed() { index, word ->
                         println(" ${index + 1} - ${word.translate}")
                     }
+                    val userInputAnswer = readln()
                 }
             }
 
