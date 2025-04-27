@@ -4,6 +4,7 @@ import java.io.File
 
 private const val LEARNED_COUNT = 3
 private const val PERCENT_100 = 100
+private const val NUMBER_4 = 4
 
 data class Word(
     val original: String,
@@ -14,6 +15,7 @@ data class Word(
 fun main() {
 
     val dictionary = loadDictionary()
+    val notLearnedList = dictionary.filter { it.correctAnswersCount < LEARNED_COUNT }
 
     while (true) {
 
@@ -28,7 +30,22 @@ fun main() {
         val inputUser = readln().toInt()
 
         when (inputUser) {
-            1 -> println("Учить слова")
+            1 -> {
+                if (notLearnedList.isEmpty()) {
+                    println("Все слова в словаре выучены")
+                } else {
+                    val questionWords = notLearnedList.take(NUMBER_4).shuffled()
+                    val correctAnswer = notLearnedList.random()
+
+                    println()
+                    println("${correctAnswer.original}:")
+                    questionWords.forEachIndexed() { index, word ->
+                        println(" ${index + 1} - ${word.translate}")
+                    }
+                    val userInputAnswer = readln()
+                }
+            }
+
             2 -> {
                 val count = dictionary.filter { it.correctAnswersCount >= LEARNED_COUNT }.count()
                 val totalCount = dictionary.size
@@ -39,6 +56,7 @@ fun main() {
             0 -> break
             else -> println("Введите число 1, 2 или 0")
         }
+
     }
 }
 
