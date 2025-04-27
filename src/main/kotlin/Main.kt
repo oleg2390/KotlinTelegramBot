@@ -5,6 +5,7 @@ import java.io.File
 private const val LEARNED_COUNT = 3
 private const val PERCENT_100 = 100
 private const val NUMBER_4 = 4
+private const val NUMBER_0 = 0
 
 data class Word(
     val original: String,
@@ -15,7 +16,7 @@ data class Word(
 fun main() {
 
     val dictionary = loadDictionary()
-    val notLearnedList = dictionary.filter { it.correctAnswersCount < LEARNED_COUNT }
+
 
     while (true) {
 
@@ -31,20 +32,54 @@ fun main() {
 
         when (inputUser) {
             1 -> {
-                if (notLearnedList.isEmpty()) {
-                    println("Все слова в словаре выучены")
-                } else {
-                    val questionWords = notLearnedList.take(NUMBER_4).shuffled()
-                    val correctAnswer = notLearnedList.random()
+               while (true) {
+                    val notLearnedList = dictionary.filter { it.correctAnswersCount < LEARNED_COUNT }
 
-                    println()
-                    println("${correctAnswer.original}:")
-                    questionWords.forEachIndexed() { index, word ->
-                        println(" ${index + 1} - ${word.translate}")
+                    if (notLearnedList.isEmpty()) {
+                        println("Все слова в словаре выучены")
+                        break
+                    } else {
+                        val questionWords = if (notLearnedList.size >= NUMBER_4) {
+                            notLearnedList.shuffled().take(NUMBER_4)
+                        } else {
+                            (notLearnedList + dictionary.shuffled())
+                                .distinctBy { it.original }
+                                .take(NUMBER_4)
+                                .shuffled()
+                        }
+                        val correctAnswer = notLearnedList.random()
+
+                        println()
+                        println("${correctAnswer.original}:")
+                        questionWords.forEachIndexed() { index, word ->
+                            println(" ${index + 1} - ${word.translate}")
+                        }
+                        println(" ----------\n 0 - Меню")
+
+                        val userAnswerInput = readlnOrNull()?.toIntOrNull()
+
+                        if (userAnswerInput == 0) break
+
+                        if (userAnswerInput != null && userAnswerInput in NUMBER_0..questionWords.size) {
+
+                            val selectWord = questionWords[userAnswerInput - 1]
+
+                            if (selectWord.original == correctAnswer.original) {
+                                println("Правильно")
+                                correctAnswer.correctAnswersCount++
+
+                                dictionary.map { word ->
+                                    if (word.original == correctAnswer.original) {
+                                        word.correctAnswersCount = correctAnswer.correctAnswersCount
+                                    }
+                                }
+                                saveDictionary(dictionary)
+
+                            } else println("не привильно, ответ: ${correctAnswer.translate}")
+                        } else println("введите корректное число")
                     }
-                    val userInputAnswer = readln()
                 }
-            }
+           }
 
             2 -> {
                 val count = dictionary.filter { it.correctAnswersCount >= LEARNED_COUNT }.count()
@@ -69,4 +104,9 @@ fun loadDictionary(): List<Word> {
         val correctCount = line.getOrNull(2)?.toIntOrNull() ?: 0
         Word(original = line[0], translate = line[1], correctAnswersCount = correctCount)
     }
+}
+
+fun saveDictionary(dictionary: List<Word>) {
+    val content = dictionary.joinToString("\n") { "${it.original}|${it.translate}|${it.correctAnswersCount}" }
+    File("words.txt").writeText(content)
 }
