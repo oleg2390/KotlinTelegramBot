@@ -18,7 +18,6 @@ fun main() {
 
     val dictionary = loadDictionary()
 
-
     while (true) {
 
         println(
@@ -33,7 +32,7 @@ fun main() {
 
         when (inputUser) {
             1 -> {
-               while (true) {
+                while (true) {
                     val notLearnedList = dictionary.filter { it.correctAnswersCount < LEARNED_COUNT }
 
                     if (notLearnedList.isEmpty()) {
@@ -59,7 +58,7 @@ fun main() {
 
                         val userAnswerInput = readlnOrNull()?.toIntOrNull()
 
-                        if (userAnswerInput == 0) break
+                        if (userAnswerInput == NUMBER_0) break
 
                         if (userAnswerInput != null && userAnswerInput in NUMBER_1..questionWords.size) {
 
@@ -80,7 +79,7 @@ fun main() {
                         } else println("введите корректное число")
                     }
                 }
-           }
+            }
 
             2 -> {
                 val count = dictionary.filter { it.correctAnswersCount >= LEARNED_COUNT }.count()
@@ -92,7 +91,6 @@ fun main() {
             0 -> break
             else -> println("Введите число 1, 2 или 0")
         }
-
     }
 }
 
@@ -108,6 +106,7 @@ fun loadDictionary(): List<Word> {
 }
 
 fun saveDictionary(dictionary: List<Word>) {
+
     val content = dictionary.joinToString("\n") { "${it.original}|${it.translate}|${it.correctAnswersCount}" }
     File("words.txt").writeText(content)
 }
