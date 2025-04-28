@@ -61,7 +61,7 @@ fun main() {
 
                         if (userAnswerInput == 0) break
 
-                        if (userAnswerInput != null && userAnswerInput in NUMBER_0..questionWords.size) {
+                        if (userAnswerInput != null && userAnswerInput in NUMBER_1..questionWords.size) {
 
                             val selectWord = questionWords[userAnswerInput - NUMBER_1]
 
