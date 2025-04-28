@@ -6,6 +6,7 @@ private const val LEARNED_COUNT = 3
 private const val PERCENT_100 = 100
 private const val NUMBER_4 = 4
 private const val NUMBER_0 = 0
+private const val NUMBER_1 = 1
 
 data class Word(
     val original: String,
@@ -52,7 +53,7 @@ fun main() {
                         println()
                         println("${correctAnswer.original}:")
                         questionWords.forEachIndexed() { index, word ->
-                            println(" ${index + 1} - ${word.translate}")
+                            println(" ${index + NUMBER_1} - ${word.translate}")
                         }
                         println(" ----------\n 0 - Меню")
 
@@ -62,7 +63,7 @@ fun main() {
 
                         if (userAnswerInput != null && userAnswerInput in NUMBER_0..questionWords.size) {
 
-                            val selectWord = questionWords[userAnswerInput - 1]
+                            val selectWord = questionWords[userAnswerInput - NUMBER_1]
 
                             if (selectWord.original == correctAnswer.original) {
                                 println("Правильно")
