@@ -4,9 +4,9 @@ import java.io.File
 
 private const val LEARNED_COUNT = 3
 private const val PERCENT_100 = 100
-private const val NUMBER_4 = 4
-private const val NUMBER_0 = 0
-private const val NUMBER_1 = 1
+private const val NUMBER_WORD_VARIANT = 4
+private const val EXIT_NUMBER_CODE = 0
+private const val ANSWER_INDEX_CORRECTION = 1
 
 data class Word(
     val original: String,
@@ -39,44 +39,52 @@ fun main() {
                         println("Все слова в словаре выучены")
                         break
                     } else {
-                        val questionWords = if (notLearnedList.size >= NUMBER_4) {
-                            notLearnedList.shuffled().take(NUMBER_4)
-                        } else {
-                            (notLearnedList + dictionary.shuffled())
-                                .distinctBy { it.original }
-                                .take(NUMBER_4)
+
+                        val questionWords = notLearnedList.shuffled().take(NUMBER_WORD_VARIANT)
+                        val missingCount = NUMBER_WORD_VARIANT - questionWords.size
+
+                        val additionalWords = if (missingCount < NUMBER_WORD_VARIANT) {
+                            dictionary
+                                .filterNot { it in questionWords }
                                 .shuffled()
+                                .take(NUMBER_WORD_VARIANT - questionWords.size)
+                        } else {
+                            emptyList()
                         }
+
+                        val resultWord = (questionWords + additionalWords).shuffled()
                         val correctAnswer = notLearnedList.random()
 
                         println()
                         println("${correctAnswer.original}:")
-                        questionWords.forEachIndexed() { index, word ->
-                            println(" ${index + NUMBER_1} - ${word.translate}")
+                        resultWord.forEachIndexed() { index, word ->
+                            println(" ${index + ANSWER_INDEX_CORRECTION} - ${word.translate}")
                         }
                         println(" ----------\n 0 - Меню")
 
                         val userAnswerInput = readlnOrNull()?.toIntOrNull()
 
-                        if (userAnswerInput == NUMBER_0) break
+                        when {
+                            userAnswerInput == EXIT_NUMBER_CODE -> break
+                            userAnswerInput != null && userAnswerInput in ANSWER_INDEX_CORRECTION..resultWord.size -> {
 
-                        if (userAnswerInput != null && userAnswerInput in NUMBER_1..questionWords.size) {
+                                val selectWord = resultWord[userAnswerInput - ANSWER_INDEX_CORRECTION]
 
-                            val selectWord = questionWords[userAnswerInput - NUMBER_1]
+                                if (selectWord.original == correctAnswer.original) {
+                                    println("Правильно")
+                                    correctAnswer.correctAnswersCount++
 
-                            if (selectWord.original == correctAnswer.original) {
-                                println("Правильно")
-                                correctAnswer.correctAnswersCount++
-
-                                dictionary.map { word ->
-                                    if (word.original == correctAnswer.original) {
-                                        word.correctAnswersCount = correctAnswer.correctAnswersCount
+                                    dictionary.map { word ->
+                                        if (word.original == correctAnswer.original) {
+                                            word.correctAnswersCount = correctAnswer.correctAnswersCount
+                                        }
                                     }
-                                }
-                                saveDictionary(dictionary)
+                                    saveDictionary(dictionary)
+                                } else println("не привильно, ответ: ${correctAnswer.translate}")
+                            }
 
-                            } else println("не привильно, ответ: ${correctAnswer.translate}")
-                        } else println("введите корректное число")
+                            else -> println("введите корректное число")
+                        }
                     }
                 }
             }
