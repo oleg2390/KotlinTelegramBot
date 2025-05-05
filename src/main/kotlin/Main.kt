@@ -15,9 +15,12 @@ data class Word(
 fun Question.asConsoleString(): String {
     val variants = this.variant
         .mapIndexed { index, word -> " ${index + ANSWER_INDEX_CORRECTION} - ${word.translate}" }
-        .joinToString(separator = "\n")
-    println()
-    return this.correctAnswer.original + "\n" + variants + "\n" + " ----------\n" + " 0 - выйти в меню"
+        .joinToString(
+            prefix = "\n ----------\n",
+            separator = "\n",
+            postfix = "\n ----------\n 0 - выйти в меню"
+        )
+    return "${correctAnswer.original}${variants}"
 }
 
 fun main() {
@@ -45,23 +48,22 @@ fun main() {
                     if (question == null) {
                         println("Все слова в словаре выучены")
                         break
-                    } else {
-                        println(question.asConsoleString())
+                    }
+                    println(question.asConsoleString())
 
-                        val userAnswerInput = readlnOrNull()?.toIntOrNull()
+                    val userAnswerInput = readlnOrNull()?.toIntOrNull()
 
-                        when {
-                            userAnswerInput == EXIT_NUMBER_CODE ->  break
+                    when {
+                        userAnswerInput == EXIT_NUMBER_CODE -> break
 
-                            userAnswerInput != null && userAnswerInput in ANSWER_INDEX_CORRECTION..question.variant.size -> {
+                        userAnswerInput != null && userAnswerInput in ANSWER_INDEX_CORRECTION..question.variant.size -> {
 
-                                if (trainer.checkAnswer(userAnswerInput.minus(1))) {
-                                    println("Правильно")
-                                } else println("не привильно, ответ: ${question.correctAnswer.translate}")
-                            }
-
-                            else -> println("введите корректное число")
+                            if (trainer.checkAnswer(userAnswerInput.minus(1))) {
+                                println("Правильно")
+                            } else println("не привильно, ответ: ${question.correctAnswer.translate}")
                         }
+
+                        else -> println("введите корректное число")
                     }
                 }
             }
@@ -76,4 +78,3 @@ fun main() {
         }
     }
 }
-
