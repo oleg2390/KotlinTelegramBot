@@ -1,8 +1,6 @@
 package org.example
 
-const val LEARNED_COUNT = 3
 const val PERCENT_100 = 100
-const val NUMBER_WORD_VARIANT = 4
 const val EXIT_NUMBER_CODE = 0
 const val ANSWER_INDEX_CORRECTION = 1
 
@@ -25,7 +23,12 @@ fun Question.asConsoleString(): String {
 
 fun main() {
 
-    val trainer = LearnWordsTrainer()
+    val trainer = try {
+        LearnWordsTrainer()
+    } catch (e: Exception) {
+        println("невозможно загрузить словарь")
+        return
+    }
 
     while (true) {
 
@@ -38,7 +41,7 @@ fun main() {
     """.trimIndent()
         )
 
-        val inputUser = readln().toInt()
+        val inputUser = readln().toIntOrNull()
 
         when (inputUser) {
             1 -> {

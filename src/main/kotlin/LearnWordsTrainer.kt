@@ -13,14 +13,17 @@ data class Question(
     val correctAnswer: Word,
 )
 
-class LearnWordsTrainer {
+class LearnWordsTrainer(
+    val learnedCount: Int = 3,
+    val numberWordVariants: Int = 4,
+) {
 
     private var question: Question? = null
     private val dictionary = loadDictionary()
 
     fun getStatistics(): Statistics {
 
-        val count = dictionary.count { it.correctAnswersCount >= LEARNED_COUNT }
+        val count = dictionary.count { it.correctAnswersCount >= learnedCount }
         val totalCount = dictionary.size
         val percent = count * PERCENT_100 / totalCount
         return Statistics(count, totalCount, percent)
@@ -28,17 +31,17 @@ class LearnWordsTrainer {
 
     fun getNextQuestion(): Question? {
 
-        val notLearnedList = dictionary.filter { it.correctAnswersCount < LEARNED_COUNT }
+        val notLearnedList = dictionary.filter { it.correctAnswersCount < learnedCount }
 
         if (notLearnedList.isEmpty()) return null
-        val questionWords = notLearnedList.shuffled().take(NUMBER_WORD_VARIANT)
-        val missingCount = NUMBER_WORD_VARIANT - questionWords.size
+        val questionWords = notLearnedList.shuffled().take(numberWordVariants)
+        val missingCount = numberWordVariants - questionWords.size
 
-        val additionalWords = if (missingCount < NUMBER_WORD_VARIANT) {
+        val additionalWords = if (missingCount < numberWordVariants) {
             dictionary
                 .filterNot { it in questionWords }
                 .shuffled()
-                .take(NUMBER_WORD_VARIANT - questionWords.size)
+                .take(numberWordVariants - questionWords.size)
         } else emptyList()
 
         val resultWord = (questionWords + additionalWords).shuffled()
@@ -65,11 +68,15 @@ class LearnWordsTrainer {
 
     private fun loadDictionary(): List<Word> {
 
-        val wordsFile: File = File("words.txt")
-        return wordsFile.readLines().map { line ->
-            val line = line.split("|")
-            val correctCount = line.getOrNull(2)?.toIntOrNull() ?: 0
-            Word(original = line[0], translate = line[1], correctAnswersCount = correctCount)
+        try {
+            val wordsFile: File = File("words.txt")
+            return wordsFile.readLines().map { line ->
+                val line = line.split("|")
+                val correctCount = line.getOrNull(2)?.toIntOrNull() ?: 0
+                Word(original = line[0], translate = line[1], correctAnswersCount = correctCount)
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            throw IllegalStateException("некорректный файл")
         }
     }
 
