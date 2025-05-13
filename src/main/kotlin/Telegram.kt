@@ -18,7 +18,6 @@ fun main(args: Array<String>) {
         val updates: String = telegramBotService.getUpdates(updateId)
         println(updates)
 
-
         val lastUpdateId = updateIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: continue
         updateId = lastUpdateId + 1
 
