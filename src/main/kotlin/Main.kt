@@ -4,12 +4,6 @@ const val PERCENT_100 = 100
 const val EXIT_NUMBER_CODE = 0
 const val ANSWER_INDEX_CORRECTION = 1
 
-data class Word(
-    val original: String,
-    val translate: String,
-    var correctAnswersCount: Int = 0,
-)
-
 fun Question.asConsoleString(): String {
     val variants = this.variant
         .mapIndexed { index, word -> " ${index + ANSWER_INDEX_CORRECTION} - ${word.translate}" }
