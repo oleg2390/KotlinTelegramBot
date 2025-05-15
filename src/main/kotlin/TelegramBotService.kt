@@ -3,15 +3,18 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+const val LEARN_WORDS_CLICKED = "learn_words_clicked"
+const val STATISTICS_CLICKED = "statistics_clicked"
+
 class TelegramBotService(
     private val token: String,
+    private val httpClient: HttpClient = HttpClient.newBuilder().build(),
 ) {
 
     fun getUpdates(updateId: Int): String {
         val urlGetUpdates = "$HTTP_URL$token/getUpdates?offset=$updateId"
-        val client: HttpClient = HttpClient.newBuilder().build()
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
-        val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response: HttpResponse<String> = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         return response.body()
     }
 
@@ -25,7 +28,6 @@ class TelegramBotService(
         } else text
 
         val urlGetChat = "$HTTP_URL$token/sendMessage"
-        val clientChat = HttpClient.newBuilder().build()
 
         val jsonBody = """
         {
@@ -40,7 +42,7 @@ class TelegramBotService(
             .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
             .build()
 
-        val responseChat = clientChat.send(requestChat, HttpResponse.BodyHandlers.ofString())
+        val responseChat = httpClient.send(requestChat, HttpResponse.BodyHandlers.ofString())
         return responseChat.body()
     }
 
@@ -56,11 +58,11 @@ class TelegramBotService(
                         [
                             {
                                 "text": "Изучить слова",
-                                "callback_data": "lear_words_clicked"
+                                "callback_data": "$LEARN_WORDS_CLICKED"
                             },
                             {
                                 "text": "Статистика",
-                                "callback_data": "statistics_clicked"
+                                "callback_data": "$STATISTICS_CLICKED"
                             }
                         ]
                     ]
@@ -68,14 +70,13 @@ class TelegramBotService(
             }
     """.trimIndent()
 
-        val clientChat = HttpClient.newBuilder().build()
         val requestChat = HttpRequest.newBuilder()
             .uri(URI.create(urlGetChat))
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
             .build()
 
-        val responseChat = clientChat.send(requestChat, HttpResponse.BodyHandlers.ofString())
+        val responseChat = httpClient.send(requestChat, HttpResponse.BodyHandlers.ofString())
         return responseChat.body()
     }
 }
