@@ -30,19 +30,21 @@ fun main(args: Array<String>) {
             ?.groups?.get(1)?.value?.toLongOrNull()
             ?: throw IllegalArgumentException("Ошибка, chat_id не найден")
 
-        telegramBotService.sendMessage(text, chatIdResult)
+        when {
+            text.lowercase() == "/start" -> telegramBotService.sendMenu(chatIdResult)
+            data?.lowercase() == STATISTICS_CLICKED -> {
+                val infoStatistics = trainer.getStatistics()
+                telegramBotService
+                    .sendMessage(
+                        "Выучено ${infoStatistics.count} из ${infoStatistics.totalCount} | ${infoStatistics.percent} %",
+                        chatIdResult
+                    )
+            }
 
-        if (text.lowercase() == "/start") {
-            telegramBotService.sendMenu(chatIdResult)
-        }
-
-        if (data?.lowercase() == STATISTICS_CLICKED) {
-            val infoStatistics = trainer.getStatistics()
-            telegramBotService
-                .sendMessage(
-                    "Выучено ${infoStatistics.count} из ${infoStatistics.totalCount} | ${infoStatistics.percent} %",
-                    chatIdResult
-                )
+            data?.lowercase() == LEARN_WORDS_CLICKED ->
+                telegramBotService.checkNextQuestionAndSend(trainer, telegramBotService, chatIdResult)
         }
     }
 }
+
+
