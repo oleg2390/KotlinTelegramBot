@@ -1,7 +1,7 @@
 hello|привет|3
 dog|собака|3
 cat|кошка|3
-thank you|спасибо|2
+thank you|спасибо|3
 screen|экран|3
 cell|ячейка|3
 number|число|3
