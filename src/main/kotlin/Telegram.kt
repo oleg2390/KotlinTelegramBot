@@ -18,7 +18,8 @@ fun main(args: Array<String>) {
         val updates: String = telegramBotService.getUpdates(updateId)
         println(updates)
 
-        val lastUpdateId = updateIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: continue
+        val lastUpdateId =
+            updateIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: continue
         updateId = lastUpdateId + 1
 
         val matchResult = messageTextRegex.findAll(updates).toList()
@@ -41,10 +42,32 @@ fun main(args: Array<String>) {
                     )
             }
 
-            data?.lowercase() == LEARN_WORDS_CLICKED ->
-                telegramBotService.checkNextQuestionAndSend(trainer, telegramBotService, chatIdResult)
+            data?.lowercase() == LEARN_WORDS_CLICKED -> {
+                telegramBotService.checkNextQuestionAndSend(
+                    trainer,
+                    telegramBotService,
+                    chatIdResult
+                )
+            }
+
+            data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true -> {
+                val answerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toIntOrNull()
+                val correctAnswerResult = trainer.question?.correctAnswer
+
+                if (trainer.checkAnswer(answerIndex)) {
+                    telegramBotService.sendMessage("Правильно!", chatIdResult)
+
+                } else telegramBotService.sendMessage(
+                    "Неправильно! ${correctAnswerResult?.original} – это ${correctAnswerResult?.translate}",
+                    chatIdResult
+                )
+
+                telegramBotService.checkNextQuestionAndSend(
+                    trainer,
+                    telegramBotService,
+                    chatIdResult
+                )
+            }
         }
     }
 }
-
-
