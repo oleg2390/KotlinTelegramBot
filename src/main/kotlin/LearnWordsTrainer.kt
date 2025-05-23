@@ -1,7 +1,9 @@
 package org.example
 
+import kotlinx.serialization.Serializable
 import java.io.File
 
+@Serializable
 data class Word(
     val original: String,
     val translate: String,
@@ -51,7 +53,7 @@ class LearnWordsTrainer(
         } else emptyList()
 
         val resultWord = (questionWords + additionalWords).shuffled()
-        val correctAnswer = notLearnedList.random()
+        val correctAnswer = questionWords.random()
         question = Question(
             variant = resultWord,
             correctAnswer = correctAnswer
