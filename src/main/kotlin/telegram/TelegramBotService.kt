@@ -1,6 +1,13 @@
+package telegram
+
 import kotlinx.serialization.json.Json
-import org.example.LearnWordsTrainer
-import org.example.Question
+import telegram.entities.InlineKeyboard
+import telegram.entities.ReplyMarkup
+import telegram.entities.Response
+import telegram.entities.SendMessageRequest
+import telegram.entities.Update
+import trainer.LearnWordsTrainer
+import trainer.model.Question
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -13,9 +20,25 @@ const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 class TelegramBotService(
     private val token: String,
     private val httpClient: HttpClient = HttpClient.newBuilder().build(),
+    private val json: Json = Json {
+        ignoreUnknownKeys = true
+    }
 ) {
+    companion object {
+        const val HTTP_URL = "https://api.telegram.org/bot"
+    }
+
+    fun getLastUpdateId(lastUpdateId: Long): List<Update> {
+
+        val responseString: String = getUpdates(lastUpdateId)
+        println(responseString)
+
+        val response: Response = json.decodeFromString(responseString)
+        return response.result
+    }
 
     fun getUpdates(updateId: Long): String {
+
         val urlGetUpdates = "$HTTP_URL$token/getUpdates?offset=$updateId"
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
         val response: HttpResponse<String> =
@@ -23,7 +46,7 @@ class TelegramBotService(
         return response.body()
     }
 
-    fun sendMessage(json: Json, text: String, chatId: Long): String {
+    fun sendMessage(text: String, chatId: Long): String {
 
         if (text.isBlank()) return "Ошибка, текст не может быть пустым"
 
@@ -49,7 +72,7 @@ class TelegramBotService(
         return responseChat.body()
     }
 
-    fun sendMenu(json: Json, chatId: Long): String {
+    fun sendMenu(chatId: Long): String {
 
         val urlGetChat = "$HTTP_URL$token/sendMessage"
         val requestBody = SendMessageRequest(
@@ -79,7 +102,6 @@ class TelegramBotService(
 
     fun checkNextQuestionAndSend(
 
-        json: Json,
         trainer: LearnWordsTrainer,
         telegramBotService: TelegramBotService,
         chatId: Long,
@@ -88,11 +110,11 @@ class TelegramBotService(
         val question = trainer.getNextQuestion()
 
         if (question == null) {
-            telegramBotService.sendMessage(json, "Все слова в словаре выучены", chatId)
-        } else telegramBotService.sendQuestion(json, chatId, question)
+            telegramBotService.sendMessage("Все слова в словаре выучены", chatId)
+        } else telegramBotService.sendQuestion(chatId, question)
     }
 
-    private fun sendQuestion(json: Json, chatId: Long, question: Question): String {
+    private fun sendQuestion(chatId: Long, question: Question): String {
 
         val urlGetChat = "$HTTP_URL$token/sendMessage"
         val requestBody = SendMessageRequest(

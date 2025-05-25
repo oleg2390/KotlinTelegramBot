@@ -1,5 +1,8 @@
 package org.example
 
+import trainer.LearnWordsTrainer
+import trainer.model.Question
+
 const val PERCENT_100 = 100
 const val EXIT_NUMBER_CODE = 0
 const val ANSWER_INDEX_CORRECTION = 1

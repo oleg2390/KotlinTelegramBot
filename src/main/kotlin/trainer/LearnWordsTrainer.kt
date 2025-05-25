@@ -1,25 +1,10 @@
-package org.example
+package trainer
 
-import kotlinx.serialization.Serializable
+import org.example.PERCENT_100
+import trainer.model.Question
+import trainer.model.Statistics
+import trainer.model.Word
 import java.io.File
-
-@Serializable
-data class Word(
-    val original: String,
-    val translate: String,
-    var correctAnswersCount: Int = 0,
-)
-
-data class Statistics(
-    val count: Int,
-    val totalCount: Int,
-    val percent: Int,
-)
-
-data class Question(
-    val variant: List<Word>,
-    val correctAnswer: Word,
-)
 
 class LearnWordsTrainer(
     val learnedCount: Int = 3,
