@@ -1,43 +1,42 @@
-import org.example.LearnWordsTrainer
+package telegram
 
-const val HTTP_URL = "https://api.telegram.org/bot"
+import trainer.LearnWordsTrainer
+
 const val START_COMMAND = "/start"
+const val TIMER_SLEEP = 2000L
 
 fun main(args: Array<String>) {
 
     val botToken = args[0]
-    var updateId = 0
+    var lastUpdateId = 0L
     val trainer = LearnWordsTrainer()
 
-    val updateIdRegex: Regex = "\"update_id\":(\\d+)".toRegex()
-    val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
-    val dataRegex: Regex = "\"data\":\"(.+?)\"".toRegex()
-    val chatIdRegex: Regex = "\"chat\":\\{\"id\":(\\d+)".toRegex()
+    val telegramBotService = TelegramBotService(botToken)
 
     while (true) {
-        Thread.sleep(2000)
-        val telegramBotService = TelegramBotService(botToken)
-        val updates: String = telegramBotService.getUpdates(updateId)
-        println(updates)
+        Thread.sleep(TIMER_SLEEP)
 
-        val lastUpdateId =
-            updateIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: continue
-        updateId = lastUpdateId + 1
+        val update = telegramBotService.getLastUpdateId(lastUpdateId)
+        val firstUpdate = update.firstOrNull() ?: continue
+        val updateId = firstUpdate.updateId
+        lastUpdateId = updateId + 1
 
-        val matchResult = messageTextRegex.findAll(updates).toList()
-        val text = matchResult.lastOrNull()?.groups?.get(1)?.value.toString()
-        val data = dataRegex.find(updates)?.groups?.get(1)?.value
-        val chatIdResult: Long = chatIdRegex
-            .find(updates)?.groups?.get(1)?.value?.toLongOrNull() ?: continue
+        val message = firstUpdate.message?.text
+        val chatId =
+            firstUpdate.message?.chat?.id
+                ?: firstUpdate.callbackQuery?.message?.chat?.id
+                ?: continue
+
+        val data = firstUpdate.callbackQuery?.data
 
         when {
-            text.lowercase() == START_COMMAND -> telegramBotService.sendMenu(chatIdResult)
+            message?.lowercase() == START_COMMAND -> telegramBotService.sendMenu(chatId)
             data?.lowercase() == STATISTICS_CLICKED -> {
                 val infoStatistics = trainer.getStatistics()
                 telegramBotService
                     .sendMessage(
                         "Выучено ${infoStatistics.count} из ${infoStatistics.totalCount} | ${infoStatistics.percent} %",
-                        chatIdResult
+                        chatId
                     )
             }
 
@@ -45,7 +44,7 @@ fun main(args: Array<String>) {
                 telegramBotService.checkNextQuestionAndSend(
                     trainer,
                     telegramBotService,
-                    chatIdResult
+                    chatId
                 )
             }
 
@@ -54,17 +53,16 @@ fun main(args: Array<String>) {
                 val correctAnswerResult = trainer.question?.correctAnswer
 
                 if (trainer.checkAnswer(answerIndex)) {
-                    telegramBotService.sendMessage("Правильно!", chatIdResult)
-
+                    telegramBotService.sendMessage("Правильно!", chatId)
                 } else telegramBotService.sendMessage(
                     "Неправильно! ${correctAnswerResult?.original} – это ${correctAnswerResult?.translate}",
-                    chatIdResult
+                    chatId
                 )
 
                 telegramBotService.checkNextQuestionAndSend(
                     trainer,
                     telegramBotService,
-                    chatIdResult
+                    chatId
                 )
             }
         }

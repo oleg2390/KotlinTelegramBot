@@ -1,23 +1,10 @@
-package org.example
+package trainer
 
+import org.example.PERCENT_100
+import trainer.model.Question
+import trainer.model.Statistics
+import trainer.model.Word
 import java.io.File
-
-data class Word(
-    val original: String,
-    val translate: String,
-    var correctAnswersCount: Int = 0,
-)
-
-data class Statistics(
-    val count: Int,
-    val totalCount: Int,
-    val percent: Int,
-)
-
-data class Question(
-    val variant: List<Word>,
-    val correctAnswer: Word,
-)
 
 class LearnWordsTrainer(
     val learnedCount: Int = 3,
@@ -51,7 +38,7 @@ class LearnWordsTrainer(
         } else emptyList()
 
         val resultWord = (questionWords + additionalWords).shuffled()
-        val correctAnswer = notLearnedList.random()
+        val correctAnswer = questionWords.random()
         question = Question(
             variant = resultWord,
             correctAnswer = correctAnswer
