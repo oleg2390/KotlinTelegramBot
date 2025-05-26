@@ -7,7 +7,7 @@ import telegram.entities.Chat
 @Serializable
 data class Message(
     @SerialName("text")
-    val text: String,
+    val text: String? = null,
     @SerialName("chat")
     val chat: Chat,
 )
