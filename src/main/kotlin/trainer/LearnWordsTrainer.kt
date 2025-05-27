@@ -7,8 +7,9 @@ import trainer.model.Word
 import java.io.File
 
 class LearnWordsTrainer(
-    val learnedCount: Int = 3,
-    val numberWordVariants: Int = 4,
+    private val fileName: String = "words.txt",
+    private val learnedCount: Int = 3,
+    private val numberWordVariants: Int = 4,
 ) {
 
     var question: Question? = null
@@ -62,7 +63,11 @@ class LearnWordsTrainer(
     private fun loadDictionary(): List<Word> {
 
         try {
-            val wordsFile: File = File("words.txt")
+            val wordsFile = File(fileName)
+            if (!wordsFile.exists()) {
+                File("words.txt").copyTo(wordsFile)
+            }
+
             return wordsFile.readLines().map { line ->
                 val line = line.split("|")
                 val correctCount = line.getOrNull(2)?.toIntOrNull() ?: 0
@@ -75,10 +80,16 @@ class LearnWordsTrainer(
 
     private fun saveDictionary() {
 
-        val words = File("words.txt")
+        val words = File(fileName)
         words.writeText("")
         dictionary.forEach {
             words.appendText("${it.original}|${it.translate}|${it.correctAnswersCount}\n")
         }
+    }
+
+    fun resetProgress() {
+
+        dictionary.forEach { it.correctAnswersCount = 0 }
+        saveDictionary()
     }
 }

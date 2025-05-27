@@ -1,0 +1,9 @@
+hello|привет|0
+dog|собака|0
+cat|кошка|0
+thank you|спасибо|0
+screen|экран|0
+cell|ячейка|0
+number|число|0
+store|хранить|0
+assign|присвоить|0

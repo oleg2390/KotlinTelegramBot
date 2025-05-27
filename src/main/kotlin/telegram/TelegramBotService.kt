@@ -15,6 +15,7 @@ import java.net.http.HttpResponse
 
 const val LEARN_WORDS_CLICKED = "learn_words_clicked"
 const val STATISTICS_CLICKED = "statistics_clicked"
+const val RESET_CLICKED = "reset_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 
 class TelegramBotService(
@@ -26,6 +27,53 @@ class TelegramBotService(
 ) {
     companion object {
         const val HTTP_URL = "https://api.telegram.org/bot"
+    }
+
+    fun handleUpdate(firstUpdate: Update, trainers: HashMap<Long, LearnWordsTrainer>) {
+
+        val message = firstUpdate.message?.text
+        val chatId =
+            firstUpdate.message?.chat?.id
+                ?: firstUpdate.callbackQuery?.message?.chat?.id
+                ?: return
+
+        val data = firstUpdate.callbackQuery?.data
+        val trainer = trainers.getOrPut(chatId) { LearnWordsTrainer("$chatId.txt") }
+
+        when {
+            message?.lowercase() == START_COMMAND -> sendMenu(chatId)
+            data?.lowercase() == STATISTICS_CLICKED -> {
+                val infoStatistics = trainer.getStatistics()
+
+                sendMessage(
+                    "Выучено ${infoStatistics.count} из ${infoStatistics.totalCount} | ${infoStatistics.percent} %",
+                    chatId
+                )
+            }
+
+            data?.lowercase() == LEARN_WORDS_CLICKED -> {
+                checkNextQuestionAndSend(trainer, this, chatId)
+            }
+
+            data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true -> {
+                val answerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toIntOrNull()
+                val correctAnswerResult = trainer.question?.correctAnswer
+
+                if (trainer.checkAnswer(answerIndex)) {
+                    sendMessage("Правильно!", chatId)
+                } else sendMessage(
+                    "Неправильно! ${correctAnswerResult?.original} – это ${correctAnswerResult?.translate}",
+                    chatId
+                )
+
+                checkNextQuestionAndSend(trainer, this, chatId)
+            }
+
+            data == RESET_CLICKED -> {
+                trainer.resetProgress()
+                sendMessage("Прогресс сброшен", chatId)
+            }
+        }
     }
 
     fun getLastUpdateId(lastUpdateId: Long): List<Update> {
@@ -83,6 +131,9 @@ class TelegramBotService(
                     listOf(
                         InlineKeyboard(text = "Изучить слова", callbackData = LEARN_WORDS_CLICKED),
                         InlineKeyboard(text = "Статистика", callbackData = STATISTICS_CLICKED)
+                    ),
+                    listOf(
+                        InlineKeyboard(text = "Сбросить прогресс", callbackData = RESET_CLICKED)
                     )
                 )
             )
